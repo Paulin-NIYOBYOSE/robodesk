@@ -101,7 +101,7 @@ export function RequestDetailPage() {
               )}
             </p>
           </Card>
-          <AssignedEpisodes request={request} editable={editable} />
+          <AssignedEpisodes request={request} editable={editable} staff={staff} />
           {editable && <EpisodePicker request={request} />}
         </div>
 

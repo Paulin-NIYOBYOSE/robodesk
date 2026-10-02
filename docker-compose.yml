@@ -63,6 +63,15 @@ services:
       retries: 20
     restart: unless-stopped
 
+  # Stretch: exports each assigned episode in the background (scale with --scale worker=N).
+  worker:
+    <<: *backend
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   frontend:
     build: ./frontend
     ports:

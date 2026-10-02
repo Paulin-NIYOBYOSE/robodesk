@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, StringConstraints, field_validator
 
-from app.models import RequestStatus
+from app.models import ExportStatus, RequestStatus
 from app.schemas.common import InputModel, OutputModel, TaskName
 from app.schemas.episode import EpisodeOut
 from app.schemas.user import UserSummary
@@ -85,6 +85,10 @@ class AssignmentOut(OutputModel):
     episode: EpisodeOut
     assigned_at: datetime
     assigned_by: UserSummary
+    export_status: ExportStatus
+    export_attempts: int
+    export_error: str | None
+    exported_at: datetime | None
 
 
 class AssignResult(OutputModel):

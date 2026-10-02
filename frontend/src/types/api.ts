@@ -3,6 +3,7 @@
 export type Role = 'client' | 'operator' | 'admin'
 export type RequestStatus = 'submitted' | 'in_progress' | 'delivered' | 'accepted' | 'rejected'
 export type Quality = 'good' | 'usable' | 'bad'
+export type ExportStatus = 'pending' | 'running' | 'succeeded' | 'failed'
 
 export const REQUEST_STATUSES: RequestStatus[] = ['submitted', 'in_progress', 'delivered', 'accepted', 'rejected']
 export const QUALITIES: Quality[] = ['good', 'usable', 'bad']
@@ -89,6 +90,10 @@ export interface Assignment {
   episode: Episode
   assigned_at: string
   assigned_by: UserSummary
+  export_status: ExportStatus
+  export_attempts: number
+  export_error: string | null
+  exported_at: string | null
 }
 
 export interface AssignResult {

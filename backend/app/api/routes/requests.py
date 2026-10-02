@@ -21,6 +21,7 @@ from app.schemas.request import (
     TransitionIn,
 )
 from app.services import assignments as assignment_service
+from app.services import exports as export_service
 from app.services import requests as request_service
 from app.services.requests import RequestFilters
 
@@ -133,4 +134,15 @@ def assign(request_id: int, body: AssignIn, db: DbSession, operator: StaffUser) 
 )
 def unassign(request_id: int, episode_id: int, db: DbSession, operator: StaffUser) -> Response:
     assignment_service.unassign_episode(db, request_id, episode_id, operator)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/{request_id}/assignments/{episode_id}/retry-export",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={**_NOT_FOUND, 409: {"description": "The export has not failed"}},
+)
+def retry_export(request_id: int, episode_id: int, db: DbSession, operator: StaffUser) -> Response:
+    """Queue a permanently failed export again (with a fresh set of attempts)."""
+    export_service.retry_export(db, request_id, episode_id, operator)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

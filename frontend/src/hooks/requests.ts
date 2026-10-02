@@ -56,6 +56,11 @@ export function useAssignments(id: number, page: number, pageSize = 10) {
     queryFn: ({ signal }) =>
       api<Page<Assignment>>(`/requests/${id}/assignments`, { query: { page, page_size: pageSize }, signal }),
     placeholderData: keepPreviousData,
+    // Poll while background exports on this page are still in flight.
+    refetchInterval: (query) =>
+      query.state.data?.items.some((a) => a.export_status === 'pending' || a.export_status === 'running')
+        ? 2000
+        : false,
   })
 }
 
@@ -115,6 +120,15 @@ export function useAssignEpisodes(id: number) {
     mutationFn: (episodeIds: number[]) =>
       api<AssignResult>(`/requests/${id}/assignments`, { method: 'POST', body: { episode_ids: episodeIds } }),
     onSettled: invalidate, // also on conflict: someone else may have taken an episode
+  })
+}
+
+export function useRetryExport(id: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (episodeId: number) =>
+      api<void>(`/requests/${id}/assignments/${episodeId}/retry-export`, { method: 'POST' }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['requests', 'assignments', id] }),
   })
 }
 
