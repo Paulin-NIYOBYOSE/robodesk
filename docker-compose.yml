@@ -8,7 +8,8 @@ name: robodesk
 
 x-backend: &backend
   build:
-    context: ./backend
+    context: .
+    dockerfile: backend/Dockerfile
     target: runtime
   image: robodesk-backend
   environment: &backend-env
@@ -42,8 +43,6 @@ services:
     environment:
       <<: *backend-env
       SEED_EPISODES: ${SEED_EPISODES:-true}
-    volumes:
-      - ./seed:/seed:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,13 +84,12 @@ services:
   # Uses its own database (<POSTGRES_DB>_test), so it never touches the app's data.
   tests:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
       target: test
     profiles: ["test"]
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-robodesk}:${POSTGRES_PASSWORD:-robodesk}@postgres:5432/${POSTGRES_DB:-robodesk}
-    volumes:
-      - ./seed:/seed:ro
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,0 +1,12 @@
+# Build context for the backend image is the repository root; keep it small.
+.git
+.github
+frontend
+**/.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.env
+**/.env.*
+seed/episodes_large*.csv
