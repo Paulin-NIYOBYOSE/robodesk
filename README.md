@@ -6,6 +6,8 @@ Clients ask for datasets ("200 episodes of a robot arm picking cups by 30 Oct").
 
 Design reasoning, trade-offs and security notes are in **[NOTES.md](NOTES.md)**.
 
+> **Reviewing?** Start with the **[10-minute reviewer guide](docs/REVIEWER_GUIDE.md)**: how to run it, demo videos, a click-through test plan with expected results, and a checklist mapping every requirement to its code and tests.
+
 ## Features
 
 - **Roles enforced by the API:** clients see only their own requests; operators run the workflow; admins also manage users.
@@ -14,6 +16,7 @@ Design reasoning, trade-offs and security notes are in **[NOTES.md](NOTES.md)**.
 - **Idempotent CSV import** (API upload or CLI) that cleans safe formatting issues, rejects questionable rows and reports every row it didn't import, with a reason.
 - **Analytics** (episodes per day per robot, requests by status, median time to delivery, top tasks) computed entirely in PostgreSQL.
 - **Stretch: background export** of each assigned episode, with retries, leases and per-episode status in the UI.
+- A landing page that explains the platform, and role-specific dashboards with a live activity feed.
 - Structured JSON request logs, `/health`, consistent JSON errors, responsive UI.
 
 ## Architecture
@@ -45,7 +48,7 @@ Requirements: **Docker** with Compose v2.
 docker compose up --build
 ```
 
-- UI: <http://localhost:3000>
+- UI: <http://localhost:3000> (landing page; **Sign in** leads to the app)
 - API docs (Swagger): <http://localhost:8000/docs>
 
 On startup a one-shot `migrate` service applies migrations, creates the seed users and imports `seed/episodes.csv`. Every step is idempotent, so restarting is safe. Configuration has development defaults; copy `.env.example` to `.env` to change ports, credentials or the JWT secret. Set `SEED_EPISODES=false` to start with an empty episode table and try the import from the UI.
@@ -72,10 +75,10 @@ The Vite dev server only proxies, so the API must be running on port 8000 first.
 ## Tests
 
 ```bash
-docker compose run --rm tests
+docker compose run --build --rm tests
 ```
 
-This runs 217 pytest tests against a real PostgreSQL database (`<db>_test`, built from the migrations on each run, so your development data is never touched). Without Docker, after the local setup above:
+This runs 219 pytest tests against a real PostgreSQL database (`<db>_test`, built from the migrations on each run, so your development data is never touched). Without Docker, after the local setup above:
 
 ```bash
 cd backend && .venv/bin/pytest
@@ -102,7 +105,7 @@ REST under `/api`, documented with OpenAPI at `/docs`. Authenticate with `POST /
 | Endpoint | Who |
 |---|---|
 | `POST /api/auth/login`, `GET /api/auth/me` | anyone / signed in |
-| `GET /api/requests` (filters: status, task, client, deadline; paginated), `GET /api/requests/summary`, `GET /api/requests/{id}` | clients see their own only |
+| `GET /api/requests` (filters: status, task, client, deadline; paginated), `GET /api/requests/summary`, `GET /api/requests/activity`, `GET /api/requests/{id}` | clients see their own only |
 | `POST /api/requests` | client |
 | `POST /api/requests/{id}/transition` | the role that owns that step |
 | `POST /api/requests/{id}/accept`, `POST /api/requests/{id}/reject` | owning client |

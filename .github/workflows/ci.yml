@@ -75,7 +75,7 @@ jobs:
             -d '{"email":"ops1@example.com","password":"ops123"}' | jq -r .access_token)
           curl -sf http://localhost:3000/api/episodes -H "Authorization: Bearer $token" | jq -e '.total == 171'
       - name: Run the test suite inside Compose
-        run: docker compose run --rm tests
+        run: docker compose run --build --rm tests
       - name: Show logs on failure
         if: failure()
         run: docker compose logs

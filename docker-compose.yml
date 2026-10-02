@@ -1,7 +1,7 @@
 # RoboDesk — full local stack.
 #
 #   docker compose up --build            # http://localhost:3000 (UI), :8000/docs (API)
-#   docker compose run --rm tests        # backend test suite against PostgreSQL
+#   docker compose run --build --rm tests   # backend test suite against PostgreSQL
 #
 # Every setting has a development default; copy .env.example to .env to override.
 name: robodesk
@@ -80,7 +80,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Not started by `up`; run with `docker compose run --rm tests`.
+  # Not started by `up`; run with `docker compose run --build --rm tests`.
   # Uses its own database (<POSTGRES_DB>_test), so it never touches the app's data.
   tests:
     build:
