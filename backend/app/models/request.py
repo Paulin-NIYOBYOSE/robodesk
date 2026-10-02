@@ -58,3 +58,4 @@ class RequestStatusHistory(Base):
     comment: Mapped[str | None] = mapped_column(Text)
 
     changed_by: Mapped[User] = relationship(lazy="raise_on_sql")
+    request: Mapped[DatasetRequest] = relationship(lazy="raise_on_sql")

@@ -8,6 +8,7 @@ from app.models import RequestStatus, User
 from app.schemas.common import Page
 from app.schemas.episode import EpisodeOut
 from app.schemas.request import (
+    ActivityOut,
     AssignIn,
     AssignmentOut,
     AssignResult,
@@ -69,6 +70,17 @@ def list_requests(
 def summary(db: DbSession, user: CurrentUser) -> RequestSummary:
     by_status, overdue = request_service.request_summary(db, user)
     return RequestSummary(by_status=by_status, total=sum(by_status.values()), overdue=overdue)
+
+
+@router.get("/activity", response_model=list[ActivityOut])
+def activity(
+    db: DbSession, user: CurrentUser, limit: Annotated[int, Query(ge=1, le=50)] = 10
+) -> list[ActivityOut]:
+    """Latest status changes, newest first. Clients only see changes on their own requests."""
+    return [
+        ActivityOut.from_orm_with(entry, task_name=entry.request.task_name, client=entry.request.client)
+        for entry in request_service.recent_activity(db, user, limit)
+    ]
 
 
 @router.post("", response_model=RequestDetail, status_code=status.HTTP_201_CREATED)

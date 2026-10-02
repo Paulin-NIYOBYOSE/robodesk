@@ -186,3 +186,25 @@ def test_history_follows_sequence_even_if_the_clock_steps_backwards(api, db, cli
     db.commit()
     history = api.get(f"/api/requests/{request.id}", headers=auth(client_a)).json()["history"]
     assert [h["new_status"] for h in history] == ["submitted", "in_progress"]
+
+
+def test_activity_feed_is_newest_first_and_respects_client_isolation(api, client_a, client_b, operator, make_request):
+    own = make_request(client_a)
+    others = make_request(client_b)
+    assert transition(api, operator, own.id, "in_progress").status_code == 200
+
+    staff_feed = api.get("/api/requests/activity", headers=auth(operator)).json()
+    assert [(e["request_id"], e["new_status"]) for e in staff_feed] == [
+        (own.id, "in_progress"),
+        (others.id, "submitted"),
+        (own.id, "submitted"),
+    ]
+    assert staff_feed[0]["changed_by"]["id"] == operator.id
+    assert staff_feed[0]["task_name"] == "pick cup"
+    assert staff_feed[0]["client"]["id"] == client_a.id
+
+    client_feed = api.get("/api/requests/activity", headers=auth(client_a)).json()
+    assert {e["request_id"] for e in client_feed} == {own.id}  # never another client's changes
+
+    assert len(api.get("/api/requests/activity", params={"limit": 1}, headers=auth(operator)).json()) == 1
+    assert api.get("/api/requests/activity", params={"limit": 500}, headers=auth(operator)).status_code == 422

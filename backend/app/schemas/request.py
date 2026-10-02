@@ -54,6 +54,14 @@ class StatusHistoryOut(OutputModel):
     comment: str | None
 
 
+class ActivityOut(StatusHistoryOut):
+    """A status change, with enough about its request to show it in a feed."""
+
+    request_id: int
+    task_name: str
+    client: UserSummary
+
+
 class RequestOut(OutputModel):
     id: int
     task_name: str

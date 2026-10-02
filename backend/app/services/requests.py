@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 
 from sqlalchemy import ColumnElement, ScalarSelect, func, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, contains_eager, joinedload
 
 from app.core.errors import ConflictError, InvalidInputError, NotFoundError
 from app.models import Assignment, DatasetRequest, RequestStatus, RequestStatusHistory, User, UserRole
@@ -136,6 +136,23 @@ def request_summary(db: Session, user: User) -> tuple[dict[RequestStatus, int], 
         )
     )
     return {status: counts.get(status, 0) for status in RequestStatus}, overdue or 0
+
+
+def recent_activity(db: Session, user: User, limit: int) -> list[RequestStatusHistory]:
+    """The latest status changes on requests this user may see (newest first, by sequence)."""
+    return list(
+        db.scalars(
+            select(RequestStatusHistory)
+            .join(RequestStatusHistory.request)
+            .options(
+                contains_eager(RequestStatusHistory.request).joinedload(DatasetRequest.client),
+                joinedload(RequestStatusHistory.changed_by),
+            )
+            .where(*_visible_to(user))
+            .order_by(RequestStatusHistory.id.desc())
+            .limit(limit)
+        )
+    )
 
 
 def create_request(db: Session, client: User, data: RequestCreate) -> DatasetRequest:
