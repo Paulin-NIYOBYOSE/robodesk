@@ -85,6 +85,13 @@ def test_operator_cannot_manage_users_or_escalate(api, operator):
     assert api.patch(f"/api/users/{operator.id}", json={"role": "admin"}, headers=headers).status_code == 403
 
 
+def test_client_directory_is_staff_only_and_has_no_emails(api, client_a, operator):
+    assert api.get("/api/clients", headers=auth(client_a)).status_code == 403
+    clients = api.get("/api/clients", headers=auth(operator)).json()
+    assert [c["id"] for c in clients] == [client_a.id]
+    assert "email" not in clients[0]
+
+
 def test_operator_cannot_create_requests_or_act_as_client(api, operator, client_a, make_request):
     payload = {"task_name": "pick cup", "episodes_requested": 1, "deadline": "2099-01-01"}
     assert api.post("/api/requests", json=payload, headers=auth(operator)).status_code == 403

@@ -67,8 +67,8 @@ def create_app() -> FastAPI:
     app.add_exception_handler(Exception, handle_unexpected_error)
 
     api = APIRouter(prefix="/api")
-    for module in (auth, requests, episodes, analytics, users):
-        api.include_router(module.router)
+    for router in (auth.router, requests.router, episodes.router, analytics.router, users.router, users.clients_router):
+        api.include_router(router)
     app.include_router(api)
     app.include_router(health.router)
     return app

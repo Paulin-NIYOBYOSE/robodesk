@@ -1,10 +1,17 @@
 from fastapi import APIRouter, status
 
-from app.api.deps import AdminUser, DbSession
-from app.schemas.user import UserCreate, UserOut, UserUpdate
+from app.api.deps import AdminUser, DbSession, StaffUser
+from app.schemas.user import UserCreate, UserOut, UserSummary, UserUpdate
 from app.services import users as user_service
 
 router = APIRouter(prefix="/users", tags=["users"])
+clients_router = APIRouter(prefix="/clients", tags=["users"])
+
+
+@clients_router.get("", response_model=list[UserSummary])
+def list_clients(db: DbSession, _: StaffUser) -> list[UserSummary]:
+    """Client accounts, for the operators' request filter (read-only, no emails)."""
+    return [UserSummary.model_validate(user) for user in user_service.list_clients(db)]
 
 
 @router.get("", response_model=list[UserOut])

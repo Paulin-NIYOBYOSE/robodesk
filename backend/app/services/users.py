@@ -15,6 +15,10 @@ def list_users(db: Session) -> list[User]:
     return list(db.scalars(select(User).order_by(User.role, User.name)))
 
 
+def list_clients(db: Session) -> list[User]:
+    return list(db.scalars(select(User).where(User.role == UserRole.CLIENT).order_by(User.name)))
+
+
 def create_user(db: Session, data: UserCreate) -> User:
     user = User(
         email=data.email,
