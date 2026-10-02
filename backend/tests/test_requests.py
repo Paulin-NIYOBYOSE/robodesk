@@ -1,6 +1,8 @@
 from datetime import date, timedelta
 
-from app.models import Assignment, EpisodeQuality
+from sqlalchemy import select
+
+from app.models import Assignment, EpisodeQuality, RequestStatus, RequestStatusHistory
 from tests.helpers import auth
 
 
@@ -166,3 +168,21 @@ def test_summary_counts_by_status(api, client_a, client_b, operator, make_reques
 
     own = api.get("/api/requests/summary", headers=auth(client_a)).json()
     assert own["total"] == 2
+
+
+def test_history_follows_sequence_even_if_the_clock_steps_backwards(api, db, client_a, operator, make_request):
+    """Regression: the VM clock stepped back ~0.5s mid-test and reordered a timestamp-sorted history."""
+    request = make_request(client_a)  # history row 1: submitted, at now()
+    first = db.scalar(select(RequestStatusHistory).where(RequestStatusHistory.request_id == request.id))
+    db.add(
+        RequestStatusHistory(
+            request_id=request.id,
+            previous_status=RequestStatus.SUBMITTED,
+            new_status=RequestStatus.IN_PROGRESS,
+            changed_by_id=operator.id,
+            changed_at=first.changed_at - timedelta(seconds=1),  # recorded later, clock went back
+        )
+    )
+    db.commit()
+    history = api.get(f"/api/requests/{request.id}", headers=auth(client_a)).json()["history"]
+    assert [h["new_status"] for h in history] == ["submitted", "in_progress"]

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 
 from sqlalchemy import Date, cast, func, select
+from sqlalchemy.dialects.postgresql import distinct_on
 from sqlalchemy.orm import Session
 
 from app.core.errors import InvalidInputError
@@ -65,13 +66,12 @@ def request_fulfilment(db: Session, start_at: datetime, end_at: datetime) -> Ful
         ).all()
     )
 
+    # The first delivery of each request, by sequence (DISTINCT ON keeps the lowest id).
     first_delivery = (
-        select(
-            RequestStatusHistory.request_id,
-            func.min(RequestStatusHistory.changed_at).label("delivered_at"),
-        )
+        select(RequestStatusHistory.request_id, RequestStatusHistory.changed_at.label("delivered_at"))
         .where(RequestStatusHistory.new_status == RequestStatus.DELIVERED)
-        .group_by(RequestStatusHistory.request_id)
+        .ext(distinct_on(RequestStatusHistory.request_id))
+        .order_by(RequestStatusHistory.request_id, RequestStatusHistory.id)
         .subquery()
     )
     seconds_to_delivery = func.extract("epoch", first_delivery.c.delivered_at - DatasetRequest.created_at)

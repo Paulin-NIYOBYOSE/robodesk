@@ -76,7 +76,9 @@ def get_request_detail(db: Session, request_id: int, user: User) -> RequestDetai
         select(RequestStatusHistory)
         .options(joinedload(RequestStatusHistory.changed_by))
         .where(RequestStatusHistory.request_id == request.id)
-        .order_by(RequestStatusHistory.changed_at, RequestStatusHistory.id)
+        # Sequence order, not timestamp order: wall clocks can step backwards (NTP,
+        # VM time sync), while ids are assigned in commit order under the request lock.
+        .order_by(RequestStatusHistory.id)
     ).all()
     return RequestDetailView(
         request=request,
