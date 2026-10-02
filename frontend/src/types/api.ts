@@ -44,6 +44,12 @@ export interface StatusHistoryEntry {
   comment: string | null
 }
 
+export interface ActivityEntry extends StatusHistoryEntry {
+  request_id: number
+  task_name: string
+  client: UserSummary
+}
+
 export interface DatasetRequest {
   id: number
   task_name: string

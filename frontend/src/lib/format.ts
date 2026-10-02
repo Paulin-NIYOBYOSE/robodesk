@@ -20,6 +20,19 @@ export function formatDateTime(value: string): string {
   return dateTimeFormat.format(new Date(value))
 }
 
+const relativeFormat = new Intl.RelativeTimeFormat('en-GB', { numeric: 'auto' })
+
+/** "just now", "5 minutes ago", "yesterday"; falls back to a date after a week. */
+export function formatRelative(value: string, now: number = Date.now()): string {
+  const seconds = Math.round((new Date(value).getTime() - now) / 1000)
+  const abs = Math.abs(seconds)
+  if (abs < 45) return 'just now'
+  if (abs < 3600) return relativeFormat.format(Math.round(seconds / 60), 'minute')
+  if (abs < 86_400) return relativeFormat.format(Math.round(seconds / 3600), 'hour')
+  if (abs < 7 * 86_400) return relativeFormat.format(Math.round(seconds / 86_400), 'day')
+  return formatDate(value)
+}
+
 export function formatNumber(value: number): string {
   return numberFormat.format(value)
 }

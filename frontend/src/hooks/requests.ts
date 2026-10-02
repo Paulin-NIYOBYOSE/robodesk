@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import type {
+  ActivityEntry,
   Assignment,
   AssignResult,
   DatasetRequest,
@@ -40,6 +41,14 @@ export function useRequestSummary() {
   return useQuery({
     queryKey: ['requests', 'summary'],
     queryFn: ({ signal }) => api<RequestSummary>('/requests/summary', { signal }),
+  })
+}
+
+export function useActivity(limit = 8) {
+  return useQuery({
+    queryKey: ['requests', 'activity', limit],
+    queryFn: ({ signal }) => api<ActivityEntry[]>('/requests/activity', { query: { limit }, signal }),
+    refetchInterval: 30_000, // keep the dashboard feed fresh without a reload
   })
 }
 

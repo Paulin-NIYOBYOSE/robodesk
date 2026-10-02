@@ -39,7 +39,7 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
         title="You don't have access to this page"
         description="Ask an administrator if you think you should."
         action={
-          <Link to="/" className="text-sm font-medium text-brand-600 hover:text-brand-700">
+          <Link to="/dashboard" className="text-sm font-medium text-brand-600 hover:text-brand-700">
             Back to dashboard
           </Link>
         }

@@ -4,6 +4,7 @@ import { FullPageSpinner, RequireAuth, RequireRole } from './components/RouteGua
 import { AppLayout } from './layouts/AppLayout'
 import { DashboardPage } from './pages/DashboardPage'
 import { EpisodesPage } from './pages/EpisodesPage'
+import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
 import { NewRequestPage } from './pages/NewRequestPage'
 import { NotFoundPage } from './pages/NotFoundPage'
@@ -17,6 +18,7 @@ const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage').then((module) =
 export function App() {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route
         element={
@@ -25,7 +27,7 @@ export function App() {
           </RequireAuth>
         }
       >
-        <Route index element={<DashboardPage />} />
+        <Route path="dashboard" element={<DashboardPage />} />
         <Route path="requests" element={<RequestsPage />} />
         <Route
           path="requests/new"
