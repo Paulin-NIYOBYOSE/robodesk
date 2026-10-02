@@ -1,10 +1,13 @@
 import json
 import logging
 
+import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from app.core.config import DEV_JWT_SECRET, Settings
 from app.core.logging import JsonFormatter
 from app.db.session import get_db
 from app.main import app
@@ -89,3 +92,11 @@ def test_request_id_is_echoed_or_generated(api):
     assert api.get("/health", headers={"X-Request-ID": "abc-123"}).headers["x-request-id"] == "abc-123"
     generated = api.get("/health", headers={"X-Request-ID": "bad id with spaces"}).headers["x-request-id"]
     assert generated != "bad id with spaces" and len(generated) == 32
+
+
+def test_production_refuses_a_weak_jwt_secret():
+    with pytest.raises(ValidationError, match="JWT_SECRET"):
+        Settings(environment="production", jwt_secret=DEV_JWT_SECRET)
+    with pytest.raises(ValidationError, match="JWT_SECRET"):
+        Settings(environment="production", jwt_secret="short")
+    assert Settings(environment="production", jwt_secret="x" * 48).is_production

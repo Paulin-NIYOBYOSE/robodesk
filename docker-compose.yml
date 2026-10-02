@@ -1,0 +1,91 @@
+# RoboDesk — full local stack.
+#
+#   docker compose up --build            # http://localhost:3000 (UI), :8000/docs (API)
+#   docker compose run --rm tests        # backend test suite against PostgreSQL
+#
+# Every setting has a development default; copy .env.example to .env to override.
+name: robodesk
+
+x-backend: &backend
+  build:
+    context: ./backend
+    target: runtime
+  image: robodesk-backend
+  environment: &backend-env
+    DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-robodesk}:${POSTGRES_PASSWORD:-robodesk}@postgres:5432/${POSTGRES_DB:-robodesk}
+    JWT_SECRET: ${JWT_SECRET:-dev-only-insecure-jwt-secret-change-me}
+    ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+    ENVIRONMENT: ${ENVIRONMENT:-development}
+    CORS_ORIGINS: ${CORS_ORIGINS:-}
+    LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-robodesk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-robodesk}
+      POSTGRES_DB: ${POSTGRES_DB:-robodesk}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  # One-shot: migrations, seed users, seed episodes. The API waits for it to succeed.
+  migrate:
+    <<: *backend
+    command: ["sh", "scripts/prestart.sh"]
+    environment:
+      <<: *backend-env
+      SEED_EPISODES: ${SEED_EPISODES:-true}
+    volumes:
+      - ./seed:/seed:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    <<: *backend
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Not started by `up`; run with `docker compose run --rm tests`.
+  # Uses its own database (<POSTGRES_DB>_test), so it never touches the app's data.
+  tests:
+    build:
+      context: ./backend
+      target: test
+    profiles: ["test"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-robodesk}:${POSTGRES_PASSWORD:-robodesk}@postgres:5432/${POSTGRES_DB:-robodesk}
+    volumes:
+      - ./seed:/seed:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

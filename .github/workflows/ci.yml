@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: robodesk
+          POSTGRES_PASSWORD: robodesk
+          POSTGRES_DB: robodesk
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U robodesk"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql+psycopg://robodesk:robodesk@localhost:5432/robodesk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Migrations apply and match the models
+        run: alembic upgrade head && alembic check
+      - run: pytest
+
+  frontend:
+    name: Frontend lint and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  compose:
+    name: Docker Compose smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start the stack from a clean checkout
+        run: docker compose up --build --detach
+      - name: Wait for the UI and API
+        run: |
+          for i in $(seq 1 90); do
+            curl -sf http://localhost:3000/ >/dev/null && curl -sf http://localhost:8000/health && exit 0
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+      - name: Log in through the frontend proxy and list episodes
+        run: |
+          token=$(curl -sf http://localhost:3000/api/auth/login -H 'Content-Type: application/json' \
+            -d '{"email":"ops1@example.com","password":"ops123"}' | jq -r .access_token)
+          curl -sf http://localhost:3000/api/episodes -H "Authorization: Bearer $token" | jq -e '.total == 171'
+      - name: Run the test suite inside Compose
+        run: docker compose run --rm tests
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
