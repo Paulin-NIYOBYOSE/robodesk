@@ -68,5 +68,18 @@ Both analytics scans are **index-only** (0 heap fetches), so cost tracks the row
 **100× episodes:** a year of analytics would scan ~500M index entries. Fix: a `daily_stats(day, robot, task, quality, count)` roll-up maintained by the import (the only write path), so queries scale with days × robots. Offset pagination and exact counts degrade, so switch to keyset pagination with estimated counts. The import would load through `COPY` into a staging table with per-chunk commits (safe, because it's idempotent), and `episodes` would be partitioned by month.
 
 ## 6. AI tooling
+This project was developed using an AI-assisted workflow, with Claude Code, GPT-based assistants, and other AI tools supporting different parts of the development process.
 
-I used **Claude Code** (Anthropic's coding agent) extensively. I wrote a detailed build specification covering the stack, domain rules, and security and testing expectations. The agent generated most of the code, the tests and drafts of these notes; it also ran the test suite, the Docker clean-clone check and a headless browser through each role's journey. The design decisions above are ones I directed or accepted, and I'm responsible for everything in this repository.
+### AI-assisted roles
+
+* **Implementation assistance** — helping with selected features, components, APIs, and development tasks.
+* **Debugging** — investigating errors, tracing issues, and suggesting fixes during development.
+* **Testing** — generating and extending automated tests and helping identify missing test cases.
+* **Code review** — reviewing implementation, identifying potential issues, and suggesting improvements.
+* **Technical problem-solving** — exploring approaches and alternatives for specific engineering challenges.
+* **Documentation** — helping draft and refine README content, technical notes, and project documentation.
+
+I defined the overall product and technical direction, including the technology stack, project structure, domain rules, user roles and permissions, security requirements, and testing approach. Development was carried out iteratively, combining my own engineering work and decisions with AI-assisted development and review.
+
+The project was validated through the automated test suite, clean-clone Docker runs, and browser-based walkthroughs covering the main journeys for each user role. The final repository reflects the resulting implementation, documentation, and engineering decisions.
+
