@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 import jwt
 
 from app.core.config import get_settings
+from app.core.rate_limit import FailedLoginLimiter
 from app.core.security import JWT_ALGORITHM
 from app.models import UserRole
 from tests.helpers import TEST_PASSWORD, auth
@@ -110,3 +111,19 @@ def test_successful_login_resets_the_failure_count(api, make_user):
         login(api, "target@example.com", "guess")
     assert login(api, "target@example.com", TEST_PASSWORD).status_code == 200
     assert login(api, "target@example.com", "guess").status_code == 401  # counter restarted
+
+
+def test_limiter_forgets_old_failures_and_stays_bounded():
+    now = [0.0]
+    limiter = FailedLoginLimiter(max_failures=2, window_seconds=60, clock=lambda: now[0])
+    limiter.record_failure("a")
+    limiter.record_failure("a")
+    assert limiter.retry_after("a") == 60
+    now[0] = 61
+    assert limiter.retry_after("a") is None  # window passed
+
+    limiter.SWEEP_THRESHOLD = 100
+    for n in range(500):  # an attacker spraying random emails
+        limiter.record_failure(f"random-{n}")
+        now[0] += 1
+    assert limiter.tracked_keys() <= 100

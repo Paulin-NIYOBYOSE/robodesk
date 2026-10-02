@@ -11,6 +11,10 @@ class FailedLoginLimiter:
     replicas this state would move to Redis (or the API gateway).
     """
 
+    # Above this many tracked keys, expired entries are swept so that failures for
+    # many different (e.g. random) emails cannot grow memory without bound.
+    SWEEP_THRESHOLD = 10_000
+
     def __init__(
         self, max_failures: int, window_seconds: int, clock: Callable[[], float] = time.monotonic
     ) -> None:
@@ -30,7 +34,14 @@ class FailedLoginLimiter:
 
     def record_failure(self, key: str) -> None:
         with self._lock:
+            if len(self._failures) >= self.SWEEP_THRESHOLD:
+                for tracked in list(self._failures):
+                    self._prune(tracked)
             self._failures.setdefault(key, deque()).append(self._clock())
+
+    def tracked_keys(self) -> int:
+        with self._lock:
+            return len(self._failures)
 
     def reset(self, key: str) -> None:
         with self._lock:
