@@ -188,8 +188,6 @@ export function EpisodePicker({ request }: { request: RequestDetail }) {
                 </Th>
                 <Th>Episode</Th>
                 <Th>Task</Th>
-                <Th>Robot</Th>
-                <Th>Recorded</Th>
                 <Th>Quality</Th>
                 <Th>Availability</Th>
               </tr>
@@ -209,14 +207,15 @@ export function EpisodePicker({ request }: { request: RequestDetail }) {
                         onChange={() => toggle(episode.id)}
                       />
                     </Td>
-                    <Td className={cn('font-mono text-[13px] whitespace-nowrap', reason ? 'text-slate-400' : 'text-slate-900')}>
-                      {episode.episode_id}
+                    <Td className="whitespace-nowrap">
+                      <div className={cn('font-mono text-[13px]', reason ? 'text-slate-400' : 'text-slate-900')}>
+                        {episode.episode_id}
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {episode.robot_id} · {formatDateTime(episode.recorded_at)}
+                      </div>
                     </Td>
                     <Td className={cn('whitespace-nowrap', reason && 'text-slate-400')}>{episode.task_name}</Td>
-                    <Td className={cn('whitespace-nowrap', reason && 'text-slate-400')}>{episode.robot_id}</Td>
-                    <Td className={cn('whitespace-nowrap', reason && 'text-slate-400')}>
-                      {formatDateTime(episode.recorded_at)}
-                    </Td>
                     <Td>
                       <QualityBadge quality={episode.quality} />
                     </Td>

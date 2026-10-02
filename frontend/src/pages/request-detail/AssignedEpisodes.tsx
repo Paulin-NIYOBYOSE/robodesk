@@ -8,7 +8,7 @@ import { Pagination } from '../../components/ui/Pagination'
 import { EmptyState, ErrorState, TableSkeleton } from '../../components/ui/States'
 import { Table, Td, Th, Tr } from '../../components/ui/Table'
 import { useAssignments, useRetryExport, useUnassignEpisode } from '../../hooks/requests'
-import { cn, formatClipLength, formatDateTime } from '../../lib/format'
+import { cn, formatClipLength, formatDate, formatDateTime } from '../../lib/format'
 import type { RequestDetail } from '../../types/api'
 
 const PAGE_SIZE = 10
@@ -67,7 +67,6 @@ export function AssignedEpisodes({ request, editable, staff }: Props) {
             <thead>
               <tr>
                 <Th>Episode</Th>
-                <Th>Recorded</Th>
                 <Th>Quality</Th>
                 <Th>Assigned by</Th>
                 <Th>Export</Th>
@@ -82,10 +81,10 @@ export function AssignedEpisodes({ request, editable, staff }: Props) {
                     <Td className="whitespace-nowrap">
                       <div className="font-mono text-[13px] text-slate-900">{episode.episode_id}</div>
                       <div className="text-xs text-slate-500">
-                        {episode.robot_id} · {formatClipLength(episode.duration_seconds)}
+                        {episode.robot_id} · {formatClipLength(episode.duration_seconds)} ·{' '}
+                        {formatDate(episode.recorded_at)}
                       </div>
                     </Td>
-                    <Td className="whitespace-nowrap">{formatDateTime(episode.recorded_at)}</Td>
                     <Td>
                       <QualityBadge quality={episode.quality} />
                     </Td>
