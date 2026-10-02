@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
 from app.api.middleware import log_requests
-from app.api.routes import auth, episodes, health, requests, users
+from app.api.routes import analytics, auth, episodes, health, requests, users
 from app.core.config import get_settings
 from app.core.errors import DomainError
 from app.core.logging import configure_logging
@@ -67,7 +67,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(Exception, handle_unexpected_error)
 
     api = APIRouter(prefix="/api")
-    for module in (auth, requests, episodes, users):
+    for module in (auth, requests, episodes, analytics, users):
         api.include_router(module.router)
     app.include_router(api)
     app.include_router(health.router)
