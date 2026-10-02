@@ -33,8 +33,8 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex items-center gap-2.5 px-5 py-5">
         <LogoMark />
         <div className="leading-tight">
-          <p className="text-[15px] font-semibold tracking-tight text-zinc-900">RoboDesk</p>
-          <p className="text-[11px] text-zinc-500">Dataset Operations</p>
+          <p className="text-[15px] font-semibold tracking-tight text-slate-900">RoboDesk</p>
+          <p className="text-[11px] text-slate-500">Dataset Operations</p>
         </div>
       </div>
 
@@ -48,7 +48,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                isActive ? 'bg-brand-50 text-brand-700' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900',
+                isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
               )
             }
           >
@@ -58,10 +58,10 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         ))}
       </nav>
 
-      <div className="border-t border-zinc-200 p-3">
+      <div className="border-t border-slate-200 p-3">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
           <div
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xs font-semibold text-zinc-700"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700"
             aria-hidden
           >
             {user.name
@@ -71,8 +71,8 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               .join('')}
           </div>
           <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-sm font-medium text-zinc-900">{user.name}</p>
-            <p className="truncate text-xs text-zinc-500">
+            <p className="truncate text-sm font-medium text-slate-900">{user.name}</p>
+            <p className="truncate text-xs text-slate-500">
               {ROLE_LABEL[user.role]}
               {user.organisation ? ` · ${user.organisation}` : ''}
             </p>
@@ -92,12 +92,12 @@ export function AppLayout() {
   return (
     <div className="min-h-screen lg:flex">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-zinc-200 bg-white lg:block">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-slate-200 bg-white lg:block">
         <Sidebar />
       </aside>
 
       {/* Mobile top bar + drawer */}
-      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
         <Button variant="ghost" size="sm" className="px-2" onClick={() => setMobileOpen(true)} aria-label="Open menu">
           <Menu className="size-5" />
         </Button>
@@ -106,7 +106,7 @@ export function AppLayout() {
       </div>
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
-          <div className="absolute inset-0 bg-zinc-950/40" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-0 bg-slate-950/40" onClick={() => setMobileOpen(false)} />
           <aside className="absolute inset-y-0 left-0 w-64 bg-white shadow-xl">
             <Button
               variant="ghost"

@@ -4,7 +4,7 @@ import { cn } from '../../lib/format'
 export type Tone = 'neutral' | 'blue' | 'amber' | 'green' | 'red' | 'violet'
 
 const TONES: Record<Tone, string> = {
-  neutral: 'bg-zinc-100 text-zinc-700 ring-zinc-500/15',
+  neutral: 'bg-slate-100 text-slate-700 ring-slate-500/15',
   blue: 'bg-blue-50 text-blue-700 ring-blue-600/15',
   amber: 'bg-amber-50 text-amber-800 ring-amber-600/20',
   green: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
@@ -13,7 +13,7 @@ const TONES: Record<Tone, string> = {
 }
 
 const DOTS: Record<Tone, string> = {
-  neutral: 'bg-zinc-400',
+  neutral: 'bg-slate-400',
   blue: 'bg-blue-500',
   amber: 'bg-amber-500',
   green: 'bg-emerald-500',

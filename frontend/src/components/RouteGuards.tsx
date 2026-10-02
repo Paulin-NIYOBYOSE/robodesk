@@ -8,7 +8,7 @@ import { EmptyState } from './ui/States'
 export function FullPageSpinner() {
   return (
     <div className="flex min-h-screen items-center justify-center" role="status" aria-label="Loading">
-      <Loader2 className="size-6 animate-spin text-zinc-400" />
+      <Loader2 className="size-6 animate-spin text-slate-400" />
     </div>
   )
 }

@@ -110,10 +110,10 @@ export function EpisodePicker({ request }: { request: RequestDetail }) {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4">
+      <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4">
         <label className="relative min-w-40 flex-1 sm:max-w-52">
           <span className="sr-only">Search episode ID</span>
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
           <Input
             className="pl-9"
             placeholder="Episode ID, e.g. EP-001"
@@ -154,10 +154,10 @@ export function EpisodePicker({ request }: { request: RequestDetail }) {
             ))}
           </Select>
         </label>
-        <label className="flex items-center gap-2 text-sm text-zinc-600">
+        <label className="flex items-center gap-2 text-sm text-slate-600">
           <input
             type="checkbox"
-            className="size-4 rounded border-zinc-300 accent-brand-600"
+            className="size-4 rounded border-slate-300 accent-brand-600"
             checked={hideUnavailable}
             onChange={(event) => changeFilter(() => setHideUnavailable(event.target.checked))}
           />
@@ -179,7 +179,7 @@ export function EpisodePicker({ request }: { request: RequestDetail }) {
                 <Th className="w-0">
                   <input
                     type="checkbox"
-                    className="size-4 rounded border-zinc-300 accent-brand-600"
+                    className="size-4 rounded border-slate-300 accent-brand-600"
                     aria-label="Select all available episodes on this page"
                     checked={allOnPageSelected}
                     disabled={selectable.length === 0}
@@ -198,23 +198,23 @@ export function EpisodePicker({ request }: { request: RequestDetail }) {
               {episodes.data.items.map((episode) => {
                 const reason = unavailableReason(episode, request.id)
                 return (
-                  <Tr key={episode.id} className={cn(reason && 'bg-zinc-50/60 text-zinc-400')}>
+                  <Tr key={episode.id} className={cn(reason && 'bg-slate-50/60 text-slate-400')}>
                     <Td>
                       <input
                         type="checkbox"
-                        className="size-4 rounded border-zinc-300 accent-brand-600 disabled:opacity-40"
+                        className="size-4 rounded border-slate-300 accent-brand-600 disabled:opacity-40"
                         aria-label={`Select ${episode.episode_id}`}
                         checked={selected.has(episode.id)}
                         disabled={reason !== null}
                         onChange={() => toggle(episode.id)}
                       />
                     </Td>
-                    <Td className={cn('font-mono text-[13px] whitespace-nowrap', reason ? 'text-zinc-400' : 'text-zinc-900')}>
+                    <Td className={cn('font-mono text-[13px] whitespace-nowrap', reason ? 'text-slate-400' : 'text-slate-900')}>
                       {episode.episode_id}
                     </Td>
-                    <Td className={cn('whitespace-nowrap', reason && 'text-zinc-400')}>{episode.task_name}</Td>
-                    <Td className={cn('whitespace-nowrap', reason && 'text-zinc-400')}>{episode.robot_id}</Td>
-                    <Td className={cn('whitespace-nowrap', reason && 'text-zinc-400')}>
+                    <Td className={cn('whitespace-nowrap', reason && 'text-slate-400')}>{episode.task_name}</Td>
+                    <Td className={cn('whitespace-nowrap', reason && 'text-slate-400')}>{episode.robot_id}</Td>
+                    <Td className={cn('whitespace-nowrap', reason && 'text-slate-400')}>
                       {formatDateTime(episode.recorded_at)}
                     </Td>
                     <Td>
@@ -224,11 +224,11 @@ export function EpisodePicker({ request }: { request: RequestDetail }) {
                       {reason === null ? (
                         <span className="font-medium text-emerald-700">Available</span>
                       ) : episode.assigned_request_id && episode.assigned_request_id !== request.id ? (
-                        <Link to={`/requests/${episode.assigned_request_id}`} className="text-zinc-500 underline">
+                        <Link to={`/requests/${episode.assigned_request_id}`} className="text-slate-500 underline">
                           {reason}
                         </Link>
                       ) : (
-                        <span className="text-zinc-500">{reason}</span>
+                        <span className="text-slate-500">{reason}</span>
                       )}
                     </Td>
                   </Tr>
@@ -240,8 +240,8 @@ export function EpisodePicker({ request }: { request: RequestDetail }) {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-b-xl border-t border-zinc-200 bg-zinc-50 px-5 py-3">
-        <p className={cn('text-sm', tooMany ? 'font-medium text-red-600' : 'text-zinc-600')} aria-live="polite">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-b-xl border-t border-slate-200 bg-slate-50 px-5 py-3">
+        <p className={cn('text-sm', tooMany ? 'font-medium text-red-600' : 'text-slate-600')} aria-live="polite">
           {tooMany
             ? `${selected.size} selected — this request only needs ${remaining} more`
             : `${selected.size} selected`}

@@ -57,10 +57,10 @@ export function EpisodesPage() {
       />
 
       <Card>
-        <div className="flex flex-wrap items-center gap-3 border-b border-zinc-100 px-5 py-4">
+        <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-5 py-4">
           <label className="relative min-w-44 flex-1 sm:max-w-60">
             <span className="sr-only">Search episode ID</span>
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
             <Input
               className="pl-9"
               placeholder="Episode ID, e.g. EP-001"
@@ -101,10 +101,10 @@ export function EpisodesPage() {
               ))}
             </Select>
           </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-600">
+          <label className="flex items-center gap-2 text-sm text-slate-600">
             <input
               type="checkbox"
-              className="size-4 rounded border-zinc-300 accent-brand-600"
+              className="size-4 rounded border-slate-300 accent-brand-600"
               checked={availableOnly}
               onChange={(event) => changeFilter(() => setAvailableOnly(event.target.checked))}
             />
@@ -149,7 +149,7 @@ export function EpisodesPage() {
               <tbody>
                 {episodes.data.items.map((episode) => (
                   <Tr key={episode.id}>
-                    <Td className="font-mono text-[13px] whitespace-nowrap text-zinc-900">{episode.episode_id}</Td>
+                    <Td className="font-mono text-[13px] whitespace-nowrap text-slate-900">{episode.episode_id}</Td>
                     <Td className="whitespace-nowrap">{episode.task_name}</Td>
                     <Td className="whitespace-nowrap">{episode.robot_id}</Td>
                     <Td className="whitespace-nowrap">{formatDateTime(episode.recorded_at)}</Td>
@@ -167,7 +167,7 @@ export function EpisodesPage() {
                           Request #{episode.assigned_request_id}
                         </Link>
                       ) : episode.quality === 'bad' ? (
-                        <span className="text-zinc-400">Not assignable</span>
+                        <span className="text-slate-400">Not assignable</span>
                       ) : (
                         <span className="text-emerald-700">Available</span>
                       )}

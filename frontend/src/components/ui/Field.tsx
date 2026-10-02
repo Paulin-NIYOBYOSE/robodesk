@@ -2,9 +2,9 @@ import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttribu
 import { cn } from '../../lib/format'
 
 const CONTROL =
-  'block w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 shadow-xs transition-colors ' +
-  'placeholder:text-zinc-400 hover:border-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-100 ' +
-  'disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500 aria-invalid:border-red-500 aria-invalid:focus:ring-red-100'
+  'block w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-xs transition-colors ' +
+  'placeholder:text-slate-400 hover:border-slate-300 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-100 ' +
+  'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 aria-invalid:border-red-500 aria-invalid:focus:ring-red-100'
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(CONTROL, 'h-9', className)} {...props} />
@@ -38,12 +38,12 @@ export function Field({ label, hint, error, className, children }: FieldProps) {
   const describedBy = [hint && hintId, error && errorId].filter(Boolean).join(' ') || undefined
   return (
     <div className={cn('space-y-1.5', className)}>
-      <label htmlFor={id} className="block text-sm font-medium text-zinc-800">
+      <label htmlFor={id} className="block text-sm font-medium text-slate-800">
         {label}
       </label>
       {children({ id, describedBy, invalid: Boolean(error) })}
       {hint && !error && (
-        <p id={hintId} className="text-xs text-zinc-500">
+        <p id={hintId} className="text-xs text-slate-500">
           {hint}
         </p>
       )}

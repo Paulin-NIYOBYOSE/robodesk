@@ -15,11 +15,11 @@ export function Progress({ value, max, showLabel = false, className }: ProgressP
     <div className={className}>
       {showLabel && (
         <div className="mb-2 flex items-baseline justify-between gap-2 text-sm">
-          <span className="text-zinc-600">
-            <span className="font-semibold text-zinc-900">{formatNumber(value)}</span> / {formatNumber(max)} episodes
+          <span className="text-slate-600">
+            <span className="font-semibold text-slate-900">{formatNumber(value)}</span> / {formatNumber(max)} episodes
             assigned
           </span>
-          <span className="tabular text-xs text-zinc-500">{Math.round(ratio * 100)}%</span>
+          <span className="tabular text-xs text-slate-500">{Math.round(ratio * 100)}%</span>
         </div>
       )}
       <div

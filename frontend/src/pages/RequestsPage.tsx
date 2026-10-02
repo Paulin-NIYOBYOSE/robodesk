@@ -76,10 +76,10 @@ export function RequestsPage() {
       />
 
       <Card>
-        <div className="flex flex-wrap items-end gap-3 border-b border-zinc-100 px-5 py-4">
+        <div className="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4">
           <label className="relative min-w-48 flex-1 sm:max-w-64">
             <span className="sr-only">Search by task</span>
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
             <Input
               className="pl-9"
               placeholder="Search task…"
@@ -111,7 +111,7 @@ export function RequestsPage() {
               </Select>
             </label>
           )}
-          <label className="flex items-center gap-2 text-sm text-zinc-600">
+          <label className="flex items-center gap-2 text-sm text-slate-600">
             <span className="whitespace-nowrap">Due by</span>
             <Input
               type="date"
@@ -189,15 +189,15 @@ export function RequestsPage() {
                       <Td>
                         <Link
                           to={`/requests/${request.id}`}
-                          className="font-medium text-zinc-900 hover:text-brand-700 hover:underline"
+                          className="font-medium text-slate-900 hover:text-brand-700 hover:underline"
                         >
                           {request.task_name}
                         </Link>
-                        <div className="text-xs text-zinc-500">#{request.id}</div>
+                        <div className="text-xs text-slate-500">#{request.id}</div>
                       </Td>
                       {staff && <Td>{request.client.organisation ?? request.client.name}</Td>}
                       <Td>
-                        <div className="tabular mb-1 text-xs text-zinc-600">
+                        <div className="tabular mb-1 text-xs text-slate-600">
                           {request.assigned_count} / {request.episodes_requested}
                         </div>
                         <Progress value={request.assigned_count} max={request.episodes_requested} />
@@ -209,7 +209,7 @@ export function RequestsPage() {
                       <Td>
                         <StatusBadge status={request.status} />
                       </Td>
-                      <Td className="whitespace-nowrap text-zinc-500">{formatDate(request.created_at)}</Td>
+                      <Td className="whitespace-nowrap text-slate-500">{formatDate(request.created_at)}</Td>
                     </Tr>
                   )
                 })}

@@ -3,10 +3,12 @@
 @theme {
   --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  /* Brand accent (indigo). Everything else uses Tailwind's neutral zinc scale. */
+  /* Brand accent (indigo). Neutrals use Tailwind's cool slate scale. */
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
   --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
   --color-brand-500: #6366f1;
   --color-brand-600: #4f46e5;
   --color-brand-700: #4338ca;
@@ -17,16 +19,33 @@
   --color-series-3: #1baf7a;
   --color-series-4: #eda100;
   --color-series-5: #e87ba4;
+
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+  --shadow-lift: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.05);
+
+  --animate-fade-up: fade-up 0.5s ease-out both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-zinc-50 text-zinc-900;
+    @apply bg-slate-50 text-slate-900;
     font-feature-settings: 'cv11', 'ss01';
   }
 
@@ -34,8 +53,35 @@
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-500;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Faint grid used behind dark brand panels and the landing hero. */
+@utility bg-grid-dark {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+@utility bg-grid-light {
+  background-image:
+    linear-gradient(rgb(15 23 42 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(15 23 42 / 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

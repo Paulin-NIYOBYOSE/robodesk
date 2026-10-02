@@ -16,7 +16,7 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
   return (
     <nav
       aria-label="Pagination"
-      className="flex items-center justify-between gap-3 border-t border-zinc-100 px-5 py-3 text-[13px] text-zinc-500"
+      className="flex items-center justify-between gap-3 border-t border-slate-100 px-5 py-3 text-[13px] text-slate-500"
     >
       <p className="tabular">
         {formatNumber(first)}–{formatNumber(last)} of {formatNumber(total)}

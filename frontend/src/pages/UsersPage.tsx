@@ -205,13 +205,13 @@ export function UsersPage() {
               {users.data.map((user) => {
                 const isMe = user.id === me.id
                 return (
-                  <Tr key={user.id} className={user.is_active ? undefined : 'text-zinc-400'}>
+                  <Tr key={user.id} className={user.is_active ? undefined : 'text-slate-400'}>
                     <Td>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-zinc-900">{user.name}</span>
+                        <span className="font-medium text-slate-900">{user.name}</span>
                         {isMe && <Badge>You</Badge>}
                       </div>
-                      <div className="text-xs text-zinc-500">{user.email}</div>
+                      <div className="text-xs text-slate-500">{user.email}</div>
                     </Td>
                     <Td>
                       <label className="sr-only" htmlFor={`role-${user.id}`}>
@@ -232,7 +232,7 @@ export function UsersPage() {
                         ))}
                       </Select>
                     </Td>
-                    <Td>{user.organisation ?? <span className="text-zinc-400">—</span>}</Td>
+                    <Td>{user.organisation ?? <span className="text-slate-400">—</span>}</Td>
                     <Td>
                       {user.is_active ? (
                         <Badge tone="green" dot>
@@ -242,7 +242,7 @@ export function UsersPage() {
                         <Badge dot>Deactivated</Badge>
                       )}
                     </Td>
-                    <Td className="whitespace-nowrap text-zinc-500">{formatDate(user.created_at)}</Td>
+                    <Td className="whitespace-nowrap text-slate-500">{formatDate(user.created_at)}</Td>
                     <Td className="text-right">
                       <Button
                         variant="ghost"

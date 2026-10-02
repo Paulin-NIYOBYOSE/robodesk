@@ -14,7 +14,7 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
     <th
       scope="col"
       className={cn(
-        'border-b border-zinc-200 bg-zinc-50/80 px-4 py-2.5 text-xs font-medium tracking-wide whitespace-nowrap text-zinc-500 first:pl-5 last:pr-5',
+        'border-b border-slate-200/80 bg-slate-50/70 px-4 py-2.5 text-[11px] font-semibold tracking-wider whitespace-nowrap text-slate-500 uppercase first:pl-5 last:pr-5',
         className,
       )}
       {...props}
@@ -25,12 +25,12 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
 export function Td({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
   return (
     <td
-      className={cn('border-b border-zinc-100 px-4 py-3 align-middle text-zinc-700 first:pl-5 last:pr-5', className)}
+      className={cn('border-b border-slate-100 px-4 py-3 align-middle text-slate-700 first:pl-5 last:pr-5', className)}
       {...props}
     />
   )
 }
 
 export function Tr({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn('transition-colors last:[&>td]:border-b-0 hover:bg-zinc-50/70', className)} {...props} />
+  return <tr className={cn('transition-colors last:[&>td]:border-b-0 hover:bg-slate-50/70', className)} {...props} />
 }

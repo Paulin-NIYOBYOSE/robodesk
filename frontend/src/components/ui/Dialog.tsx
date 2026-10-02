@@ -43,7 +43,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
         if (event.target === ref.current) onClose() // backdrop click
       }}
       className={cn(
-        'm-auto w-[calc(100%-2rem)] rounded-xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-xl backdrop:bg-zinc-950/40',
+        'm-auto w-[calc(100%-2rem)] rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/50 backdrop:backdrop-blur-[2px]',
         SIZES[size],
       )}
     >
@@ -54,7 +54,7 @@ export function Dialog({ open, onClose, title, description, children, footer, si
               <h2 id={titleId} className="text-base font-semibold">
                 {title}
               </h2>
-              {description && <div className="mt-1 text-sm text-zinc-500">{description}</div>}
+              {description && <div className="mt-1 text-sm text-slate-500">{description}</div>}
             </div>
             <Button variant="ghost" size="sm" className="-mt-1 -mr-2 px-1.5" onClick={onClose} aria-label="Close">
               <X className="size-4" />

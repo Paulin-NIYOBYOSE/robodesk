@@ -24,18 +24,18 @@ function SummaryTiles({ tiles }: { tiles: Tile[] }) {
         <Link
           key={tile.label}
           to={tile.to}
-          className="group rounded-xl border border-zinc-200 bg-white px-5 py-4 shadow-xs transition-colors hover:border-zinc-300"
+          className="group rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-xs transition-colors hover:border-slate-300"
         >
-          <p className="text-[13px] text-zinc-500">{tile.label}</p>
+          <p className="text-[13px] text-slate-500">{tile.label}</p>
           <p
             className={cn(
-              'mt-1 text-2xl font-semibold tracking-tight text-zinc-900',
+              'mt-1 text-2xl font-semibold tracking-tight text-slate-900',
               tile.emphasis && tile.value > 0 && 'text-red-600',
             )}
           >
             {formatNumber(tile.value)}
           </p>
-          <p className="mt-0.5 flex items-center gap-1 text-xs text-zinc-400 group-hover:text-brand-600">
+          <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-400 group-hover:text-brand-600">
             View <ArrowRight className="size-3" aria-hidden />
           </p>
         </Link>
@@ -87,25 +87,25 @@ function RequestShortList({
       ) : requests.data.items.length === 0 ? (
         <EmptyState icon={Inbox} title={emptyText} />
       ) : (
-        <ul className="divide-y divide-zinc-100">
+        <ul className="divide-y divide-slate-100">
           {requests.data.items.map((request) => {
             const overdue = isOverdue(request.deadline, request.status)
             return (
               <li key={request.id}>
                 <Link
                   to={`/requests/${request.id}`}
-                  className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 transition-colors hover:bg-zinc-50"
+                  className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 transition-colors hover:bg-slate-50"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-zinc-900">{request.task_name}</p>
-                    <p className="text-xs text-zinc-500">
+                    <p className="truncate text-sm font-medium text-slate-900">{request.task_name}</p>
+                    <p className="text-xs text-slate-500">
                       #{request.id}
                       {showClient && ` · ${request.client.organisation ?? request.client.name}`} · due{' '}
                       <span className={cn(overdue && 'font-medium text-red-600')}>{formatDate(request.deadline)}</span>
                     </p>
                   </div>
                   <div className="w-28">
-                    <p className="tabular mb-1 text-right text-xs text-zinc-500">
+                    <p className="tabular mb-1 text-right text-xs text-slate-500">
                       {request.assigned_count} / {request.episodes_requested}
                     </p>
                     <Progress value={request.assigned_count} max={request.episodes_requested} />

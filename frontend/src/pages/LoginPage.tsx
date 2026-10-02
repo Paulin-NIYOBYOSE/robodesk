@@ -45,17 +45,17 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
           <LogoMark className="size-11" />
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900">RoboDesk</h1>
-          <p className="mt-1 text-sm text-zinc-500">Robotics Dataset Request &amp; Operations Platform</p>
+          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">RoboDesk</h1>
+          <p className="mt-1 text-sm text-slate-500">Robotics Dataset Request &amp; Operations Platform</p>
         </div>
 
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-zinc-900">Sign in</h2>
-          <p className="mt-1 text-sm text-zinc-500">Use the account provided by your RoboDesk administrator.</p>
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-slate-900">Sign in</h2>
+          <p className="mt-1 text-sm text-slate-500">Use the account provided by your RoboDesk administrator.</p>
 
           {state.status === 'anonymous' && state.reason === 'expired' && !error && (
             <div className="mt-4 flex gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-sm text-blue-800" role="status">

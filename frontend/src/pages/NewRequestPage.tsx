@@ -59,7 +59,7 @@ export function NewRequestPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Link to="/requests" className="mb-4 inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900">
+      <Link to="/requests" className="mb-4 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900">
         <ArrowLeft className="size-4" aria-hidden /> Back to requests
       </Link>
       <PageHeader title="New dataset request" description="Tell us what you need; an operator will pick it up." />
@@ -129,7 +129,7 @@ export function NewRequestPage() {
             </Field>
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-zinc-100 px-5 py-4 sm:px-6">
+          <div className="flex justify-end gap-2 border-t border-slate-100 px-5 py-4 sm:px-6">
             <Link to="/requests" className={buttonStyles('secondary')}>
               Cancel
             </Link>

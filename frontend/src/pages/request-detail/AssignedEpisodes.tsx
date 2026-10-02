@@ -80,8 +80,8 @@ export function AssignedEpisodes({ request, editable, staff }: Props) {
                 return (
                   <Tr key={episode.id}>
                     <Td className="whitespace-nowrap">
-                      <div className="font-mono text-[13px] text-zinc-900">{episode.episode_id}</div>
-                      <div className="text-xs text-zinc-500">
+                      <div className="font-mono text-[13px] text-slate-900">{episode.episode_id}</div>
+                      <div className="text-xs text-slate-500">
                         {episode.robot_id} · {formatClipLength(episode.duration_seconds)}
                       </div>
                     </Td>
@@ -89,7 +89,7 @@ export function AssignedEpisodes({ request, editable, staff }: Props) {
                     <Td>
                       <QualityBadge quality={episode.quality} />
                     </Td>
-                    <Td className="whitespace-nowrap text-zinc-500">
+                    <Td className="whitespace-nowrap text-slate-500">
                       {assigned_by.name}
                       <div className="text-xs">{formatDateTime(assigned_at)}</div>
                     </Td>
@@ -116,7 +116,7 @@ export function AssignedEpisodes({ request, editable, staff }: Props) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="px-2 text-zinc-500 hover:text-red-600"
+                          className="px-2 text-slate-500 hover:text-red-600"
                           onClick={() => remove(episode.id, episode.episode_id)}
                           disabled={unassign.isPending}
                           aria-label={`Remove ${episode.episode_id}`}
