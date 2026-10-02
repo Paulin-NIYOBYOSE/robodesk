@@ -2,7 +2,7 @@
 
 Tests run against a real PostgreSQL database (the analytics, locking and constraint
 behaviour under test is PostgreSQL-specific). The database is ``<DATABASE_URL db>_test``
-unless TEST_DATABASE_URL is set; it is created if missing and rebuilt from the Alembic
+(DATABASE_URL from the environment or backend/.env) unless TEST_DATABASE_URL is set; it is created if missing and rebuilt from the Alembic
 migrations at the start of every session, so the migrations are exercised too.
 """
 
@@ -10,7 +10,9 @@ import os
 
 from sqlalchemy.engine import make_url
 
-_base_url = os.environ.get("DATABASE_URL", "postgresql+psycopg://robodesk:robodesk@localhost:5432/robodesk")
+from app.core.config import Settings
+
+_base_url = Settings().database_url  # environment first, then .env, then the default
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL") or make_url(_base_url).set(
     database=f"{make_url(_base_url).database}_test"
 ).render_as_string(hide_password=False)

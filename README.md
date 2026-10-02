@@ -50,18 +50,35 @@ docker compose up --build
 
 On startup a one-shot `migrate` service applies migrations, creates the seed users and imports `seed/episodes.csv`. Every step is idempotent, so restarting is safe. Configuration has development defaults; copy `.env.example` to `.env` to change ports, credentials or the JWT secret. Set `SEED_EPISODES=false` to start with an empty episode table and try the import from the UI.
 
+### Local development (without Docker)
+
+With PostgreSQL running locally and an empty `robodesk` database:
+
+```bash
+cd backend
+python3.13 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+echo 'DATABASE_URL=postgresql+psycopg://USER:PASS@localhost:5432/robodesk' > .env   # git-ignored
+.venv/bin/alembic upgrade head
+.venv/bin/python -m app.cli seed-users ../seed/users.json
+.venv/bin/python -m app.cli import-episodes ../seed/episodes.csv
+.venv/bin/uvicorn app.main:app --reload --port 8000     # API
+.venv/bin/python -m app.worker                          # export worker (second terminal)
+
+cd ../frontend && npm install && npm run dev            # http://localhost:5173, proxies /api to :8000
+```
+
+The Vite dev server only proxies, so the API must be running on port 8000 first. Otherwise the UI shows "Cannot reach the server" and Vite logs `ECONNREFUSED`.
+
 ## Tests
 
 ```bash
 docker compose run --rm tests
 ```
 
-This runs 217 pytest tests against a real PostgreSQL database (`<db>_test`, built from the migrations on each run). Without Docker, with PostgreSQL running locally:
+This runs 217 pytest tests against a real PostgreSQL database (`<db>_test`, built from the migrations on each run, so your development data is never touched). Without Docker, after the local setup above:
 
 ```bash
-cd backend
-python3.13 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
-DATABASE_URL=postgresql+psycopg://USER:PASS@localhost:5432/robodesk .venv/bin/pytest
+cd backend && .venv/bin/pytest
 ```
 
 The tests focus on the rules that matter: authentication, authorization (including IDOR and a sweep asserting that every endpoint requires a token), every valid and invalid status transition for every role, the assignment rules including a real two-transaction race, import edge cases and idempotency, analytics correctness, and the export job's retry and stale-worker handling. CI (`.github/workflows/ci.yml`) also runs a migration drift check, the frontend lint/build, and a full `docker compose up` smoke test.
