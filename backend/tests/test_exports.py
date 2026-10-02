@@ -136,8 +136,7 @@ def test_process_one_runs_the_whole_cycle(assign):
     def failing_export(job: ClaimedJob) -> None:
         raise ExportFailed("disk full")
 
-    clock = lambda: T0  # noqa: E731
-    job, error = process_one(SessionLocal, export=failing_export, clock=clock)
+    job, error = process_one(SessionLocal, export=failing_export, clock=lambda: T0)
     assert (job.attempt, error) == (1, "disk full")
     assert process_one(SessionLocal, export=lambda job: None, clock=lambda: T0 + timedelta(minutes=1)) is not None
     assert state(assignment.id).export_status == ExportStatus.SUCCEEDED
