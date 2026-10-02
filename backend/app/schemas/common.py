@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Annotated
+from typing import Annotated, Any, Self
 
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
@@ -15,6 +15,13 @@ class InputModel(BaseModel):
 
 class OutputModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+    @classmethod
+    def from_orm_with(cls, obj: Any, **extra: Any) -> Self:
+        """Build from an ORM object plus fields it does not carry itself
+        (aggregates such as ``assigned_count`` that were computed by the query)."""
+        data = {name: getattr(obj, name) for name in cls.model_fields if name not in extra}
+        return cls.model_validate({**data, **extra})
 
 
 class Page[T](BaseModel):
