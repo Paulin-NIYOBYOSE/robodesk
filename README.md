@@ -1,59 +1,112 @@
 # RoboDesk
 
-**Robotics Dataset Request & Operations Platform** — an internal tool that replaces the spreadsheet used to track dataset requests for robot teleoperation data.
+**Robotics Dataset Request & Operations Platform**: an internal web app that replaces the spreadsheet used to track dataset requests for robot teleoperation data.
 
-Clients ask for datasets ("200 episodes of a robot arm picking cups by 30 Oct"). Operators fulfil requests by assigning recorded episodes. Clients then accept or reject each delivery.
+Clients request datasets ("200 episodes of a robot arm picking cups by 30 Oct"). Operators fulfil them by assigning recorded episodes. Clients then accept or reject the delivery.
 
-Design reasoning, trade-offs and security notes are in **[NOTES.md](NOTES.md)**.
+- Design decisions, security and scale: **[NOTES.md](NOTES.md)**
+- Short demo videos: [docs/demo/](docs/demo/)
 
-> **Reviewing?** Start with the **[10-minute reviewer guide](docs/REVIEWER_GUIDE.md)**: how to run it, demo videos, a click-through test plan with expected results, and a checklist mapping every requirement to its code and tests.
+---
 
-## Features
+## 1. Run it
 
-- **Roles enforced by the API:** clients see only their own requests; operators run the workflow; admins also manage users.
-- **Request workflow** `submitted → in_progress → delivered → accepted | rejected → in_progress`, with every change audited (who, when, why).
-- **Assignment rules:** only `good`/`usable` episodes; one request per episode, guaranteed by a database constraint even under concurrent clicks; no delivery until enough episodes are assigned.
-- **Idempotent CSV import** (API upload or CLI) that cleans safe formatting issues, rejects questionable rows and reports every row it didn't import, with a reason.
-- **Analytics** (episodes per day per robot, requests by status, median time to delivery, top tasks) computed entirely in PostgreSQL.
-- **Stretch: background export** of each assigned episode, with retries, leases and per-episode status in the UI.
-- A landing page that explains the platform, and role-specific dashboards with a live activity feed.
-- Structured JSON request logs, `/health`, consistent JSON errors, responsive UI.
-
-## Architecture
-
-```
-browser ──► nginx (frontend container) ──/api──► FastAPI (backend) ──► PostgreSQL
-              static React build                    ▲
-                                       export worker ┘ (same image, python -m app.worker)
-```
-
-- **backend/** — FastAPI + SQLAlchemy 2. Routes (`app/api`) stay thin; business rules live in `app/services` (the state machine is `services/workflow.py`). Schemas are Pydantic, and the schema is managed by Alembic (`migrations/`).
-- **frontend/** — React + TypeScript (Vite), TanStack Query for server state, Tailwind for styling. nginx serves it and proxies `/api`, so the browser talks to a single origin.
-- **seed/** — the supplied `users.json`, `episodes.csv` and generator, used as-is.
-
-## Stack
-
-| | |
-|---|---|
-| Backend | Python 3.13, FastAPI, SQLAlchemy 2, Alembic, Pydantic 2, PyJWT, argon2-cffi, pytest |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, React Router, TanStack Query, Recharts, lucide-react, sonner |
-| Database | PostgreSQL 17 (any version ≥ 14 works) |
-| Infrastructure | Docker Compose, nginx, GitHub Actions |
-
-## Running
-
-Requirements: **Docker** with Compose v2.
+You only need **Docker** (with Docker Compose v2).
 
 ```bash
+git clone https://github.com/Paulin-NIYOBYOSE/robodesk.git
+cd robodesk
 docker compose up --build
 ```
 
-- UI: <http://localhost:3000> (landing page; **Sign in** leads to the app)
-- API docs (Swagger): <http://localhost:8000/docs>
+The first build takes a few minutes. Then open:
 
-On startup a one-shot `migrate` service applies migrations, creates the seed users and imports `seed/episodes.csv`. Every step is idempotent, so restarting is safe. Configuration has development defaults; copy `.env.example` to `.env` to change ports, credentials or the JWT secret. Set `SEED_EPISODES=false` to start with an empty episode table and try the import from the UI.
+| | |
+|---|---|
+| **The app** | <http://localhost:3000> → click **Sign in** |
+| API docs (Swagger) | <http://localhost:8000/docs> |
+| Health check | <http://localhost:8000/health> |
 
-### Local development (without Docker)
+On startup the database is migrated, the seed users below are created, and the supplied `seed/episodes.csv` is imported. Restarting is safe; nothing is created twice.
+
+- **Stop:** `Ctrl+C`, then `docker compose down`
+- **Start again from an empty database:** `docker compose down -v`, then `docker compose up --build`
+- **Port 3000 or 8000 already in use:** `FRONTEND_PORT=3001 API_PORT=8001 docker compose up --build`
+
+## 2. Sign in
+
+Test accounts from `seed/users.json`. For development only; passwords are stored hashed (argon2id).
+
+| Role | Email | Password | Can |
+|---|---|---|---|
+| Admin | admin@example.com | `admin123` | everything an operator can, plus create/deactivate users and change roles |
+| Operator | ops1@example.com | `ops123` | see all requests, move them through the workflow, assign episodes, import CSV |
+| Operator | ops2@example.com | `ops123` | same as above |
+| Client | client-a@example.com | `client123` | Acme Robotics: create requests, see only its own, accept/reject deliveries |
+| Client | client-b@example.com | `client123` | Beta Labs: same as above |
+
+**Quick walkthrough:** sign in as a client and create a request → sign in as an operator, open it, click **Start work**, assign episodes, **Mark as delivered** → sign in as the client again and accept or reject it. The request page shows the full history of who changed what, and when.
+
+## 3. Run the tests
+
+```bash
+docker compose run --build --rm tests
+```
+
+This runs **219 backend tests** against a real PostgreSQL database (a separate `_test` database, so the app's data is untouched). They cover:
+
+- authentication and authorization, including a client trying to reach another client's request, and every endpoint refusing anonymous calls
+- every valid and invalid status transition, for every role
+- the assignment rules, including two operators assigning the same episode at the same moment
+- CSV import edge cases and idempotency (importing the same file twice)
+- analytics results and the background export job
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the tests, the frontend lint and build, and a full `docker compose up` check on every push to `main`.
+
+---
+
+## How it works
+
+| Part | What it is |
+|---|---|
+| `backend/` | Python 3.13 · FastAPI · SQLAlchemy · PostgreSQL · Alembic migrations · pytest. Business rules live in `app/services/` (the status workflow is `services/workflow.py`). |
+| `frontend/` | React + TypeScript (Vite) · Tailwind. Served by nginx, which forwards `/api` to the backend. |
+| `worker` | Runs the background export jobs (the stretch item). |
+| `seed/` | The supplied data files, unchanged. |
+
+**Workflow:** `submitted → in_progress → delivered → accepted`, or `delivered → rejected → in_progress` (rework). Clients accept or reject; operators do the rest. Any other move is refused by the API, and every change is recorded with who made it and when.
+
+**Assignment rules:** only `good` or `usable` episodes; an episode belongs to at most one request (guaranteed by a database constraint); a request can't be delivered until enough episodes are assigned.
+
+### CSV import
+
+In the app: **Episodes → Import CSV**. For large files, use the command line:
+
+```bash
+docker compose cp my-episodes.csv backend:/tmp/episodes.csv
+docker compose exec backend python -m app.cli import-episodes /tmp/episodes.csv
+```
+
+Importing is safe to repeat: `episode_id` is the key, and existing episodes are never duplicated or overwritten. The report lists what was imported, what was skipped and what was rejected, with a reason and line number for each rejected row. The supplied file gives **171 imported, 2 duplicates skipped, 16 rejected**; importing it again adds nothing.
+
+### Analytics, and how it behaves with 5 million episodes
+
+`GET /api/analytics?from=YYYY-MM-DD&to=YYYY-MM-DD` returns episodes recorded per day per robot, request counts by status with the median time from submitted to delivered, and the top 5 tasks by number of good episodes. PostgreSQL computes all three (`GROUP BY`, `percentile_cont`); the API never loads raw episodes into Python.
+
+Measured on a laptop with 5,000,000 generated episodes (`seed/generate_episodes.py 5000000`):
+
+- 30 days of analytics: **0.28 s**; a full year: **1.2 s**. The queries read an index over the date range only, so cost grows with the range, not the table.
+- Importing all 5 million rows: 23 minutes, with constant memory use.
+
+What would change at much larger scale (daily summary tables, different pagination, faster bulk loading) is in [NOTES.md](NOTES.md#5-scale).
+
+### Stretch item: background work
+
+Each assigned episode goes through a simulated export job run by the `worker` service. A job takes 2–5 s and fails about 20% of the time. Failed jobs are retried automatically (up to 3 attempts), and running a job again is harmless. The request page shows each episode's export status live, and operators can retry a failed export.
+
+---
+
+## Development without Docker
 
 With PostgreSQL running locally and an empty `robodesk` database:
 
@@ -64,88 +117,11 @@ echo 'DATABASE_URL=postgresql+psycopg://USER:PASS@localhost:5432/robodesk' > .en
 .venv/bin/alembic upgrade head
 .venv/bin/python -m app.cli seed-users ../seed/users.json
 .venv/bin/python -m app.cli import-episodes ../seed/episodes.csv
-.venv/bin/uvicorn app.main:app --reload --port 8000     # API
-.venv/bin/python -m app.worker                          # export worker (second terminal)
+.venv/bin/uvicorn app.main:app --reload --port 8000     # API (terminal 1)
+.venv/bin/python -m app.worker                          # export worker (terminal 2)
+.venv/bin/pytest                                        # tests
 
-cd ../frontend && npm install && npm run dev            # http://localhost:5173, proxies /api to :8000
+cd ../frontend && npm install && npm run dev            # http://localhost:5173 (terminal 3)
 ```
 
-The Vite dev server only proxies, so the API must be running on port 8000 first. Otherwise the UI shows "Cannot reach the server" and Vite logs `ECONNREFUSED`.
-
-## Tests
-
-```bash
-docker compose run --build --rm tests
-```
-
-This runs 219 pytest tests against a real PostgreSQL database (`<db>_test`, built from the migrations on each run, so your development data is never touched). Without Docker, after the local setup above:
-
-```bash
-cd backend && .venv/bin/pytest
-```
-
-The tests focus on the rules that matter: authentication, authorization (including IDOR and a sweep asserting that every endpoint requires a token), every valid and invalid status transition for every role, the assignment rules including a real two-transaction race, import edge cases and idempotency, analytics correctness, and the export job's retry and stale-worker handling. CI (`.github/workflows/ci.yml`) also runs a migration drift check, the frontend lint/build, and a full `docker compose up` smoke test.
-
-## Seed credentials
-
-> **Development/test accounts only**, from `seed/users.json`. Passwords are stored as argon2id hashes.
-
-| Role | Email | Password |
-|---|---|---|
-| Admin | admin@example.com | admin123 |
-| Operator | ops1@example.com | ops123 |
-| Operator | ops2@example.com | ops123 |
-| Client (Acme Robotics) | client-a@example.com | client123 |
-| Client (Beta Labs) | client-b@example.com | client123 |
-
-## API
-
-REST under `/api`, documented with OpenAPI at `/docs`. Authenticate with `POST /api/auth/login` and send `Authorization: Bearer <token>`. Errors are always `{"detail": "..."}` (422 validation errors list the fields).
-
-| Endpoint | Who |
-|---|---|
-| `POST /api/auth/login`, `GET /api/auth/me` | anyone / signed in |
-| `GET /api/requests` (filters: status, task, client, deadline; paginated), `GET /api/requests/summary`, `GET /api/requests/activity`, `GET /api/requests/{id}` | clients see their own only |
-| `POST /api/requests` | client |
-| `POST /api/requests/{id}/transition` | the role that owns that step |
-| `POST /api/requests/{id}/accept`, `POST /api/requests/{id}/reject` | owning client |
-| `GET /api/requests/{id}/assignments` | staff, owning client |
-| `POST /api/requests/{id}/assignments`, `DELETE …/assignments/{episode_id}`, `POST …/{episode_id}/retry-export` | operator, admin |
-| `GET /api/episodes` (task, quality, robot, availability, id prefix), `GET /api/episodes/facets`, `POST /api/episodes/import` | operator, admin |
-| `GET /api/analytics?from=YYYY-MM-DD&to=YYYY-MM-DD`, `GET /api/clients` | operator, admin |
-| `GET /api/users`, `POST /api/users`, `PATCH /api/users/{id}` | admin |
-| `GET /health` | unauthenticated (probe; reveals nothing) |
-
-## Import
-
-Upload a CSV from **Episodes → Import CSV** (up to 50 MB), or use the CLI, which has no size limit:
-
-```bash
-python3 seed/generate_episodes.py 200000 > seed/episodes_large.csv   # optional: a big clean file
-docker compose cp seed/episodes_large.csv backend:/tmp/episodes.csv
-docker compose exec backend python -m app.cli import-episodes /tmp/episodes.csv
-```
-
-`episode_id` (case-insensitive) is the idempotency key. Existing episodes are never duplicated or overwritten, so importing the same file twice is safe. Rows are inserted in batches with `ON CONFLICT DO NOTHING`. Anything that wasn't inserted is compared with the stored episode: an identical row is reported as a *skipped duplicate*, a different one as a *rejected conflict*. Whitespace, letter case and known date layouts are normalised (and counted); questionable values are rejected with a reason and line number. The supplied file gives **171 imported, 2 skipped duplicates, 16 rejected** (plus 2 blank lines ignored); importing it again gives 0 imported, 173 skipped and the same 16 rejected. Each decision is explained in [NOTES.md](NOTES.md#1-design).
-
-## Analytics
-
-`GET /api/analytics` runs three aggregate queries in PostgreSQL and returns only the aggregated rows: a `GROUP BY` UTC day and robot, `percentile_cont(0.5)` over submitted-to-first-delivery times, and a `GROUP BY` task over good episodes. Each is an index-backed range scan on `recorded_at`, using a composite index for per-robot counts and a partial index containing only good episodes for top tasks. The analytics page charts this data and offers a table view; it never computes from raw episodes.
-
-## Scale
-
-Measured on a laptop with **5 million** generated episodes (`seed/generate_episodes.py 5000000`):
-
-- **Analytics:** a 30-day range takes 0.28 s and a full year (all 5M episodes) 1.2 s. Both main queries are index-only scans, so time grows with the rows *in the range*, not with the table.
-- **Import:** 5M rows in 23 min with flat 146 MB memory (streamed, batched `ON CONFLICT DO NOTHING`); re-importing is idempotent at that size.
-- **Episode browser:** 0.1–0.3 s per page; id search and the task facet list take milliseconds.
-
-What breaks first at 10× users and 100× episodes, and what I'd change (daily roll-ups, keyset pagination, `COPY`-based import, partitioning, Redis for the rate limiter), is in [NOTES.md](NOTES.md#5-scale).
-
-## Stretch item
-
-**Background work.** Each assignment has an export job, and a `worker` service (`python -m app.worker`, safe to scale) claims due jobs with `FOR UPDATE SKIP LOCKED`. It runs the simulated export (2–5 s, about 20% failure) outside any transaction, retries with exponential backoff up to 3 attempts, and reclaims jobs whose lease expired. It only records a result if it still owns that attempt. Exports are idempotent (deterministic destination per request and episode). The request page shows per-episode export status live, and operators can retry a failed export.
-
-## AI tooling
-
-AI coding assistance (Claude Code) was used extensively; what it did and how is described in [NOTES.md](NOTES.md#6-ai-tooling).
+The frontend dev server forwards `/api` to port 8000, so start the API first. Otherwise the UI shows "Cannot reach the server".
