@@ -8,7 +8,7 @@ import { Pagination } from '../../components/ui/Pagination'
 import { EmptyState, ErrorState, TableSkeleton } from '../../components/ui/States'
 import { Table, Td, Th, Tr } from '../../components/ui/Table'
 import { useAssignments, useRetryExport, useUnassignEpisode } from '../../hooks/requests'
-import { cn, formatClipLength, formatDate, formatDateTime } from '../../lib/format'
+import { cn, formatClipLength, formatDate, formatDateTime, formatRelative } from '../../lib/format'
 import type { RequestDetail } from '../../types/api'
 
 const PAGE_SIZE = 10
@@ -90,7 +90,9 @@ export function AssignedEpisodes({ request, editable, staff }: Props) {
                     </Td>
                     <Td className="whitespace-nowrap text-slate-500">
                       {assigned_by.name}
-                      <div className="text-xs">{formatDateTime(assigned_at)}</div>
+                      <div className="text-xs" title={formatDateTime(assigned_at)}>
+                        {formatRelative(assigned_at)}
+                      </div>
                     </Td>
                     <Td className="whitespace-nowrap">
                       <div className="flex items-center gap-1">

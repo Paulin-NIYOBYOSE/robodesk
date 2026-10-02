@@ -29,8 +29,8 @@ function DetailSkeleton() {
   return (
     <div className="space-y-6" role="status" aria-label="Loading request">
       <Skeleton className="h-8 w-72" />
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Skeleton className="h-64 lg:col-span-2" />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <Skeleton className="h-64" />
         <Skeleton className="h-64" />
       </div>
     </div>
@@ -90,8 +90,8 @@ export function RequestDetailPage() {
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="min-w-0 space-y-6 lg:col-span-2">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0 space-y-6">
           <Card className="p-5">
             <Progress value={request.assigned_count} max={request.episodes_requested} showLabel />
             <p className="mt-3 text-[13px] text-slate-500">
